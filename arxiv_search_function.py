@@ -17,13 +17,13 @@
 
 ## packages
 import pandas as pd
-import xml.etree.ElementTree as ET
 import datetime
 import time
 import sys
 import string
 import gc
 import requests
+import xml.etree.ElementTree as ET
 from urllib.parse import urlencode
 from urllib.request import urlopen
 from urllib.error import HTTPError
@@ -40,8 +40,8 @@ from urllib.error import HTTPError
 # athr_exc	   - list of str            - authors to exclude
 # athr_one	   - list of lists of str   - authors of which one must be included
 # subjects	   - list of str 			- subject options are:
-#											astro-ph, cond-mat, gr-qc, hep-ex, hep-lat, hep-ph, hep-th, math-ph, nlin, nucl-ex, nucl-th, physics, quant-ph,
-#											math, cs, q-bio, q-fin, stat
+#											astro-ph, cond-mat, gr-qc, hep-ex, hep-lat, hep-ph, hep-th, math-ph, nlin, nucl-ex, nucl-th, 
+#											physics, quant-ph, math, cs, q-bio, q-fin, stat
 # max_records  - int             		- maximum number of results to return
 # max_time 	   - float           		- maximum amount of seconds to be spent searching 
 # cols 		   - list            		- arxiv fields to extract
@@ -60,7 +60,7 @@ def arxivsearch(start_date = datetime.date.today().replace(day=1),
 	athr_req = [], 
 	athr_exc = [], 
 	athr_one = [], 
-	subjects = [], 
+	subjects = ['cs'], 
 	max_records = 50, 
 	max_time = 300,
 	cols = ['id', 'title', 'authors', 'date', 'categories', 'abstract'],
@@ -157,26 +157,24 @@ def arxivsearch(start_date = datetime.date.today().replace(day=1),
 			### want to find only indices that correspond to desired papers
 		
 			## merge abstracts and titles into one big text blob without punctuation to search for keywords in
-			abstract_title_concats = [title+' '+abstract for title,abstract in zip(titles,abstracts)]
-			translator = str.maketrans(string.punctuation, ' '*len(string.punctuation))
-			abstract_title_sets = [set(abstract_title_concat.translate(translator).split()) for abstract_title_concat in abstract_title_concats]
+			abstract_title_concats = [title+'. '+abstract for title,abstract in zip(titles,abstracts)]
 			
 			### Choose indices to match keywords and authors
 
 			## only abstracts and titles that have intersection with required categories
 			if len(kwd_one) > 0:
 				# for each kwd_one list take indexes such that title/abstract intersect with the list
-				kwd_one_idxs_lists = [set([idx for idx,val in enumerate(list(map(len,map(lambda x: x.intersection(kwd_one_list), abstract_title_sets)))) if val > 0]) for kwd_one_list in kwd_one]
+				kwd_one_idxs_lists = [set([idx for idx,val in enumerate(list(map(lambda x: any([kwd in x for kwd in kwd_one_list]), abstract_title_concats))) if val]) for kwd_one_list in kwd_one]
 				# take intersection of all the kwd_one index sets
 				kwd_one_idxs = kwd_one_idxs_lists[0].intersection(*kwd_one_idxs_lists) 
 			else:
 				kwd_one_idxs = set(range(len(abstract_title_sets)))
 			if len(kwd_req) > 0:
-				kwd_req_idxs = set([idx for idx,val in enumerate(list(map(len,map(lambda x: x.intersection(kwd_req), abstract_title_sets)))) if val == len(kwd_req)])
+				kwd_req_idxs = set([idx for idx,val in enumerate(list(map(lambda x: all([kwd in x for kwd in kwd_req]), abstract_title_concats))) if val])
 			else:
 				kwd_req_idxs = set(range(len(abstract_title_sets)))
 			if len(kwd_exc) > 0:
-				kwd_exc_idxs = set([idx for idx,val in enumerate(list(map(len,map(lambda x: x.intersection(kwd_exc), abstract_title_sets)))) if val == 0])
+				kwd_exc_idxs = set([idx for idx,val in enumerate(list(map(lambda x: all([kwd not in x for kwd in kwd_exc]), abstract_title_concats))) if val])
 			else:
 				kwd_exc_idxs = set(range(len(abstract_title_sets)))
 
@@ -184,23 +182,23 @@ def arxivsearch(start_date = datetime.date.today().replace(day=1),
 			# annoying intersection syntax makes you pick a set to apply method to, arbitrarily chose kwd_one
 			kwd_idxs = kwd_one_idxs.intersection(kwd_req_idxs, kwd_exc_idxs)
 
-			## consider sets of author names to intersect with
-			full_name_sets = [set(full_name_list) for full_name_list in full_name_lists]
+			## merge author names together into comma separated string
+			full_name_concats = [(', ').join(full_name_list) for full_name_list in full_name_lists]
 
 			## only authors that are specified as desired
 			if len(athr_one) > 0:
 				# for each athr_one list take indexes such that author list intersects with the list
-				athr_one_idxs_lists = [set([idx for idx,val in enumerate(list(map(len,map(lambda x: x.intersection(athr_one_list), full_name_sets)))) if val > 0]) for athr_one_list in athr_one]
+				athr_one_idxs_lists = [set([idx for idx,val in enumerate(list(map(lambda x: any([athr in x for athr in athr_one_list]), full_name_concats))) if val]) for athr_one_list in athr_one]
 				# take intersection of all the athr_one index sets
 				athr_one_idxs = athr_one_idxs_lists[0].intersection(*athr_one_idxs_lists) 
 			else:
 				athr_one_idxs = set(range(len(full_name_sets)))
 			if len(athr_req) > 0:
-				athr_req_idxs = set([idx for idx,val in enumerate(list(map(len,map(lambda x: x.intersection(athr_req), full_name_sets)))) if val == len(athr_req)])
+				athr_req_idxs = set([idx for idx,val in enumerate(list(map(lambda x: all([athr in x for athr in athr_req]), full_name_concats))) if val])
 			else:
 				athr_req_idxs = set(range(len(full_name_sets)))
 			if len(athr_exc) > 0:
-				athr_exc_idxs = set([idx for idx,val in enumerate(list(map(len,map(lambda x: x.intersection(athr_exc), full_name_sets)))) if val == 0])
+				athr_exc_idxs = set([idx for idx,val in enumerate(list(map(lambda x: all([athr not in x for athr in athr_exc]), full_name_concats))) if val])
 			else:
 				athr_exc_idxs = set(range(len(full_name_sets)))
 
