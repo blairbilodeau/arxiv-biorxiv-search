@@ -1,6 +1,6 @@
 #####
 # Created by Blair Bilodeau
-# Last modified May 16, 2020
+# Last modified May 22, 2020
 
 #####
 # Resources:
@@ -140,16 +140,21 @@ def biorxivsearch(start_date = datetime.date.today().replace(day=1),
 		# access url and pull html data
 		if page == 0:
 			url_response = requests.post(url)
-			html = bs(url_response.text)
+			html = bs(url_response.text, features='html.parser')
 
 			# find out how many results there are, and make sure don't pull more than user wants
-			num_results = int(html.find('div', attrs={'class': 'highwire-search-summary'}).text.strip().split()[0])
+			num_results_text = html.find('div', attrs={'class': 'highwire-search-summary'}).text.strip().split()[0]
+			if num_results_text == 'No':
+				print('No results found matching search criteria.')
+				return()
+
+			num_results = int(num_results_text)
 			num_fetch_results = min(max_records, num_results)
 		
 		else:
 			page_url = url + '?page=' + str(page)
 			url_response = requests.post(page_url)
-			html = bs(url_response.text)
+			html = bs(url_response.text, features='html.parser')
 
 		# list of articles on page
 		articles = html.find_all(attrs={'class': 'search-result'})
@@ -186,7 +191,7 @@ def biorxivsearch(start_date = datetime.date.today().replace(day=1),
 	## check if abstracts are to be pulled
 	if abstracts:
 		print('Fetching abstracts for {:d} papers...'.format(len(full_records_df)))
-		full_records_df['abstract'] = [bs(requests.post(paper_url).text).find('div', attrs={'class': 'section abstract'}).text.replace('Abstract','').replace('\n','') for paper_url in full_records_df.url]
+		full_records_df['abstract'] = [bs(requests.post(paper_url).text, features='html.parser').find('div', attrs={'class': 'section abstract'}).text.replace('Abstract','').replace('\n','') for paper_url in full_records_df.url]
 		cols += ['abstract']
 		print('Abstracts fetched.')
 
@@ -225,26 +230,3 @@ def biorxivsearch(start_date = datetime.date.today().replace(day=1),
 
 	## return the results
 	return(records_df)
-
-records_df = biorxivsearch(start_date = datetime.date.today().replace(day=1), 
-	end_date = datetime.date.today().replace(day=6), 
-	journal = 'both',
-	subjects = ['Biochemistry'], 
-	kwd = ['covid', 'stem cell'], 
-	kwd_type = 'any',
-	abstracts=True,
-	athr = [], 
-	max_records = 10,
-	max_time = 300)
-
-# records_df = biorxivsearch(start_date = datetime.date.today().replace(day=1), 
-# 	end_date = datetime.date.today().replace(day=6), 
-# 	journal = 'both',
-# 	subjects = ['Biochemistry'], 
-# 	kwd = [], 
-# 	kwd_type = 'any',
-# 	athr = ['charlotte', 'matthew jones'], 
-# 	max_records = 300,
-# 	max_time = 300)
-
-print(records_df.title)

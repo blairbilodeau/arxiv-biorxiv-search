@@ -1,6 +1,6 @@
 #####
 # Created by Blair Bilodeau
-# Last modified May 11, 2020
+# Last modified May 22, 2020
 
 #####
 # Inspired by:
@@ -168,15 +168,15 @@ def arxivsearch(start_date = datetime.date.today().replace(day=1),
 				# take intersection of all the kwd_one index sets
 				kwd_one_idxs = kwd_one_idxs_lists[0].intersection(*kwd_one_idxs_lists) 
 			else:
-				kwd_one_idxs = set(range(len(abstract_title_sets)))
+				kwd_one_idxs = set(range(len(abstract_title_concats)))
 			if len(kwd_req) > 0:
 				kwd_req_idxs = set([idx for idx,val in enumerate(list(map(lambda x: all([kwd in x for kwd in kwd_req]), abstract_title_concats))) if val])
 			else:
-				kwd_req_idxs = set(range(len(abstract_title_sets)))
+				kwd_req_idxs = set(range(len(abstract_title_concats)))
 			if len(kwd_exc) > 0:
 				kwd_exc_idxs = set([idx for idx,val in enumerate(list(map(lambda x: all([kwd not in x for kwd in kwd_exc]), abstract_title_concats))) if val])
 			else:
-				kwd_exc_idxs = set(range(len(abstract_title_sets)))
+				kwd_exc_idxs = set(range(len(abstract_title_concats)))
 
 			## intersection of all keyword indices
 			# annoying intersection syntax makes you pick a set to apply method to, arbitrarily chose kwd_one
@@ -192,15 +192,15 @@ def arxivsearch(start_date = datetime.date.today().replace(day=1),
 				# take intersection of all the athr_one index sets
 				athr_one_idxs = athr_one_idxs_lists[0].intersection(*athr_one_idxs_lists) 
 			else:
-				athr_one_idxs = set(range(len(full_name_sets)))
+				athr_one_idxs = set(range(len(full_name_concats)))
 			if len(athr_req) > 0:
 				athr_req_idxs = set([idx for idx,val in enumerate(list(map(lambda x: all([athr in x for athr in athr_req]), full_name_concats))) if val])
 			else:
-				athr_req_idxs = set(range(len(full_name_sets)))
+				athr_req_idxs = set(range(len(full_name_concats)))
 			if len(athr_exc) > 0:
 				athr_exc_idxs = set([idx for idx,val in enumerate(list(map(lambda x: all([athr not in x for athr in athr_exc]), full_name_concats))) if val])
 			else:
-				athr_exc_idxs = set(range(len(full_name_sets)))
+				athr_exc_idxs = set(range(len(full_name_concats)))
 
 			## intersection of all author indices
 			# annoying intersection syntax makes you pick a set to apply method to, arbitrarily chose athr_one
