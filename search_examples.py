@@ -9,6 +9,7 @@
 
 import arxiv_search_function as asf
 import biorxiv_search_function as bsf
+import medrxiv_search_function as msf
 import datetime
 
 records_df = asf.arxivsearch(
@@ -37,9 +38,19 @@ records_df2 = asf.arxivsearch(
 records_df3 = bsf.biorxivsearch(
 	start_date = datetime.date.today().replace(day=1), 
 	end_date = datetime.date.today(), 
-	journal = 'both',
 	subjects = [], 
 	kwd = ['domain', 'Single-Cell'], 
+	kwd_type = 'all',
+	abstracts=True,
+	athr = [], 
+	max_records = 50,
+	max_time = 300)
+
+records_df4 = msf.medrxivsearch(
+	start_date = datetime.date(2020,5,1), 
+	end_date = datetime.date(2020,5,12), 
+	subjects = ['Sports Medicine'], 
+	kwd = ['brain'], 
 	kwd_type = 'all',
 	abstracts=True,
 	athr = [], 

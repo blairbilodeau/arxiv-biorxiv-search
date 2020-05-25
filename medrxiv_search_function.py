@@ -1,10 +1,10 @@
 #####
 # Created by Blair Bilodeau
-# Last modified May 22, 2020
+# Last modified May 25, 2020
 
 #####
 # Resources:
-# https://www.biorxiv.org/search
+# https://www.medrxiv.org/search
 
 ######################################################################
 
@@ -29,15 +29,20 @@ from bs4 import BeautifulSoup as bs
 # athr	   	   - list of max 2 str      - authors which are required
 # subjects	   - list of str 			- subject options are:
 #										  (Note capitalization and spacing are important for subject)
-# 											Animal Behaviour and Cognition, Biochemistry, Bioengineering, Bioinformatics,
-#											Biophysics, Cancer Biology, Cell Biology, Clinical Trials, Developmental Biology,
-#											Ecology, Epidemiology, Evolutionary Biology, Genetics, Genomics, Immunology,
-#											Microbiology, Molecular Biology, Neuroscience, Paleontology, Pathology, 
-#											Pharmacology and Toxicology, Physiology, Plant Biology, Scientific Communication and Education,
-#											Synthetic Biology, Systems Biology, Zoology
+# 											Addiction Medicine, Allergy and Immunology, Anesthesia, Cardiovascular Medicine, 
+#											Dentistry and Oral Medicine, Dermatology, Emergency Medicine, Endocrinology,
+#											Epidemiology, Forensic Medicine, Gastroenterology, Genetic and Genomic Medicine, Geriatric Medicine, 
+#											Health Economics, Health Informatics, Health Policy, Health Systems and Quality Improvement, 
+#											Hematology, HIV/AIDS, Infectious Diseases (except HIV/AIDS), Intensive Care and Critical Care Medicine, 
+#											Medical Education, Medical Ethics, Nephrology, Neurology, Nursing, Nutrition, Obstetrics and Gynecology, 
+#											Occupational and Environmental Health, Oncology, Ophthalmology, Orthopedics, Otolaryngology, Pain Medicine, 
+#											Palliative Medicine, Pathology, Pediatrics, Pharmacology and Therapeutics, Primary Care Research, 
+#											Psychiatry and Clinical Psychology, Public and Global Health, Radiology and Imaging, Rehabilitation Medicine and Physical Therapy, 
+#											Respiratory Medicine, Rheumatology, Sexual and Reproductive Health, Sports Medicine, Surgery, Toxicology, 
+#											Transplantation, Urology
 # max_records  - int             		- maximum number of results to return
 # max_time 	   - float           		- maximum amount of seconds to be spent searching 
-# cols 		   - list            		- biorxiv fields to extract
+# cols 		   - list            		- medrxiv fields to extract
 #				  							column options are:
 # 				  							title, authors, date, url
 # abstract     - bool  					- whether to extract the abstract of every paper returned by search 
@@ -47,7 +52,7 @@ from bs4 import BeautifulSoup as bs
 # download     - str             		- folder location to dump returned pdfs into
 #								 			(files named using year_lastname format)
 
-def biorxivsearch(start_date = datetime.date.today().replace(day=1), 
+def medrxivsearch(start_date = datetime.date.today().replace(day=1), 
 	end_date = datetime.date.today(), 
 	subjects = [], 
 	kwd = [], 
@@ -65,7 +70,7 @@ def biorxivsearch(start_date = datetime.date.today().replace(day=1),
 	overall_time = time.time()
 
 	## url
-	BASE = 'http://biorxiv.org/search/'
+	BASE = 'http://medrxiv.org/search/'
 	url = BASE
 
 	## format dates
@@ -77,8 +82,9 @@ def biorxivsearch(start_date = datetime.date.today().replace(day=1),
 
 	### build the url string
 
-	## journal selection (use medrxiv_search_function.py for medrxiv)
-	journal_str = 'jcode%3Abiorxiv'
+	## journal selection (use biorxiv_search_function.py for biorxiv)
+	journal_str = 'jcode%3Amedrxiv'
+
 	url += journal_str
 
 	## subject selection
@@ -154,7 +160,7 @@ def biorxivsearch(start_date = datetime.date.today().replace(day=1),
 		titles += [article.find('span', attrs={'class': 'highwire-cite-title'}).text.strip() if article.find('span', attrs={'class': 'highwire-cite-title'}) is not None else None for article in articles]
 		author_lists += [[author.text for author in article.find_all('span', attrs={'class': 'highwire-citation-author'})] for article in articles]
 		
-		urls = ['http://www.biorxiv.org' + article.find('a', href=True)['href'] for article in articles]
+		urls = ['http://www.medrxiv.org' + article.find('a', href=True)['href'] for article in articles]
 
 		dates += [('-').join(article.find('div', attrs={'class': 'highwire-article-citation highwire-citation-type-highwire-article'}).get('data-pisa').strip().split(';')[1].split('.')[0:3]) for article in articles]
 
@@ -208,7 +214,7 @@ def biorxivsearch(start_date = datetime.date.today().replace(day=1),
 	## check if user wants to export this dataframe
 	if export != '':
 		if exportfile == '':
-			exportfile = datetime.date.today().strftime('%Y-%m-%d') + '-biorxiv-metadata.csv'
+			exportfile = datetime.date.today().strftime('%Y-%m-%d') + '-medrxiv-metadata.csv'
 		exportpath = export + exportfile
 		print('Exporting records as csv to {:s}...'.format(exportpath))
 		records_df.to_csv(exportpath, index=False)
