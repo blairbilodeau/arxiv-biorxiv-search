@@ -5,7 +5,7 @@
 #####
 # Inspired by:
 # https://pypi.org/project/arxiv-checker/
-# https://github.com/mahdisadjadi/arxivscraper (more useful)
+# https://github.com/mahdisadjadi/arxivscraper (more relevant)
 
 #####
 # Resources:
