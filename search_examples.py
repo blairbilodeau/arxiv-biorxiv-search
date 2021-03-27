@@ -12,7 +12,8 @@ import biomedrxiv_search_function as bmsf
 import datetime
 
 records_df = asf.arxivsearch(
-	start_date = datetime.date.today().replace(day=1), 
+	#start_date = datetime.date.today().replace(day=1), 
+	start_date = datetime.date.today() - datetime.timedelta(days=7),
  	end_date = datetime.date.today(), 
 	subjects = ['cs','stat'], 
 	kwd_req = ['online', 'regret'], 
@@ -21,6 +22,20 @@ records_df = asf.arxivsearch(
 	max_records = 50, 
 	max_time = 300,
 	cols = ['id', 'title', 'categories', 'abstract', 'authors', 'date'])
+print(records_df.title)
+
+records_df = asf.arxivsearch(
+	#start_date = datetime.date.today().replace(day=1), 
+	start_date = datetime.date.today() - datetime.timedelta(days=2), 
+ 	end_date = datetime.date.today(), 
+	subjects = ['cs','stat'], 
+	kwd_req = ['minimax'], 
+	kwd_exc = [], 
+	kwd_one = [['density','log loss']], 
+	max_records = 50, 
+	max_time = 300,
+	cols = ['id', 'title', 'categories', 'abstract', 'authors', 'date'])
+print(records_df.title)
 
 records_df2 = asf.arxivsearch(
 	start_date = datetime.date.today().replace(day=1), 
